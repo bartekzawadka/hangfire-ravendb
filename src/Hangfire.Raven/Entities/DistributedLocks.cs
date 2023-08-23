@@ -5,6 +5,7 @@
         public string Id => $"DistributedLocks/{Resource}";
 
         public string Resource { get; set; }
+
         public string ClientId { get; set; }
     }
 }
