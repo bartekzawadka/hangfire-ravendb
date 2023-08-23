@@ -72,9 +72,6 @@ namespace Hangfire.Raven.Storage
 
         public IEnumerable<string> QueueNames { get; set; }
 
-        public string ClientId {
-            get { return _clientId; }
-        }
-
+        public string ClientId => _clientId;
     }
 }

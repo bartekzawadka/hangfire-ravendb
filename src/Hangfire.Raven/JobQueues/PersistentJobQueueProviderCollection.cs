@@ -1,3 +1,4 @@
+using Hangfire.Raven.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,26 +30,18 @@ namespace Hangfire.Raven.JobQueues
 
             _providers.Add(provider);
 
-            foreach (var queue in queues) {
+            foreach (var queue in queues)
+            {
                 _providersByQueue.Add(queue, provider);
             }
         }
 
-        public IPersistentJobQueueProvider GetProvider(string queue)
-        {
-            return _providersByQueue.ContainsKey(queue)
-                ? _providersByQueue[queue]
-                : _defaultProvider;
-        }
+        public IPersistentJobQueueProvider GetProvider(string queue) => _providersByQueue.ContainsKey(queue)
+            ? _providersByQueue[queue]
+            : _defaultProvider;
 
-        public IEnumerator<IPersistentJobQueueProvider> GetEnumerator()
-        {
-            return _providers.GetEnumerator();
-        }
+        public IEnumerator<IPersistentJobQueueProvider> GetEnumerator() => _providers.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
