@@ -74,6 +74,6 @@ stages:
             inputs:
               command: push
               versioningScheme: 'byEnvVar'
-              versionEnvVar: $(AppVersion)
+              versionEnvVar: AppVersion
               publishVstsFeed: 'Baz'
               allowPackageConflicts: true
