@@ -40,15 +40,15 @@ stages:
             displayName: 'Use .NET'
             inputs:
               version: 6.x
-          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
-            displayName: 'Replace tokens in files'
-            inputs:
-                rootDirectory: src
-                targetFiles: |
-                  $(HangfireRavenProjectPath)
-                writeBOM: false
-                tokenPrefix: '##{'
-                tokenSuffix: '}##'
+          # - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+          #   displayName: 'Replace tokens in files'
+          #   inputs:
+          #       rootDirectory: src
+          #       targetFiles: |
+          #         $(HangfireRavenProjectPath)
+          #       writeBOM: false
+          #       tokenPrefix: '##{'
+          #       tokenSuffix: '}##'
           - task: DotNetCoreCLI@2
             displayName: '[.Net] Restore'
             inputs:
@@ -73,5 +73,7 @@ stages:
             displayName: 'NuGet push'
             inputs:
               command: push
+              versioningScheme: 'byEnvVar'
+              versionEnvVar: $(AppVersion)
               publishVstsFeed: 'Baz'
               allowPackageConflicts: true

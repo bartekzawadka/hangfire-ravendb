@@ -6,8 +6,8 @@ using Xunit;
 using Hangfire.Raven.DistributedLocks;
 using Hangfire.Raven.Storage;
 using Hangfire.Raven.Entities;
-using Raven.Client.Linq;
 using System.Linq;
+using Hangfire.Raven.Extensions;
 
 namespace Hangfire.Raven.Tests
 {
@@ -161,7 +161,7 @@ namespace Hangfire.Raven.Tests
 
                     DistributedLock lockEntry = session.Query<DistributedLock>().Where(_ => _.Resource == "resource1").FirstOrDefault();
                     Assert.NotNull(lockEntry);
-                    var expireAt = session.Advanced.GetExpire(lockEntry);
+                    var expireAt = session.GetExpiry(lockEntry);
                     Assert.True(expireAt > initialExpireAt);
                 }
             });

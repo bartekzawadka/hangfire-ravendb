@@ -11,6 +11,7 @@ using Xunit;
 using Hangfire.Raven.JobQueues;
 using Hangfire.Raven.Storage;
 using Hangfire.Raven.Entities;
+using Hangfire.Raven.Extensions;
 
 namespace Hangfire.Raven.Tests
 {
@@ -148,7 +149,7 @@ namespace Hangfire.Raven.Tests
                     Assert.Equal("SampleMethod", job.Method.Name);
                     Assert.Equal("Hello", job.Args[0]);
 
-                    var expireAt = session.Advanced.GetExpire(ravenJob);
+                    var expireAt = session.GetExpiry(ravenJob);
                     Assert.True(createdAt.AddDays(1).AddMinutes(-1) < expireAt);
                     Assert.True(expireAt < createdAt.AddDays(1).AddMinutes(1));
 
@@ -1017,7 +1018,7 @@ namespace Hangfire.Raven.Tests
                         }
                     };
                     session.Store(ravenSet);
-                    session.Advanced.AddExpire(ravenSet, DateTime.UtcNow.AddMinutes(60));
+                    session.SetExpiry(ravenSet, DateTime.UtcNow.AddMinutes(60));
                     session.Store(new RavenSet
                     {
                         Id = repository.GetId(typeof(RavenSet), "set-2"),
@@ -1179,7 +1180,7 @@ namespace Hangfire.Raven.Tests
                         }
                     };
                     session.Store(ravenHash);
-                    session.Advanced.AddExpire(ravenHash, DateTime.UtcNow.AddHours(1));
+                    session.SetExpiry(ravenHash, DateTime.UtcNow.AddHours(1));
                     session.Store(new RavenHash
                     {
                         Id = repository.GetId(typeof(RavenHash), "hash-2"),
@@ -1353,7 +1354,7 @@ namespace Hangfire.Raven.Tests
                         Values = new List<string> { "1" }
                     };
                     session.Store(ravenList);
-                    session.Advanced.AddExpire(ravenList, DateTime.UtcNow.AddHours(1));
+                    session.SetExpiry(ravenList, DateTime.UtcNow.AddHours(1));
                     session.Store(new RavenList
                     {
                         Id = repository.GetId(typeof(RavenList), "list-2"),

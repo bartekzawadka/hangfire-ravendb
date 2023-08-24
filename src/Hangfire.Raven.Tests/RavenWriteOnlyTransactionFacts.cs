@@ -6,8 +6,9 @@ using Moq;
 using Xunit;
 using Hangfire.Raven.JobQueues;
 using Hangfire.Raven.Storage;
-using Raven.Client;
 using Hangfire.Raven.Entities;
+using Hangfire.Raven.Extensions;
+using Raven.Client.Documents.Session;
 
 namespace Hangfire.Raven.Tests
 {
@@ -65,11 +66,11 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testJob = GetTestJob(session, job.Id);
-                    var expireAt = session.Advanced.GetExpire(testJob);
+                    var expireAt = session.GetExpiry(testJob);
                     Assert.True(DateTime.UtcNow.AddMinutes(-1) < expireAt && expireAt <= DateTime.UtcNow.AddDays(1));
 
                     var anotherTestJob = GetTestJob(session, anotherJob.Id);
-                    expireAt = session.Advanced.GetExpire(anotherTestJob);
+                    expireAt = session.GetExpiry(anotherTestJob);
                     Assert.Null(expireAt);
                 }
             });
@@ -99,9 +100,9 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     session.Store(job);
-                    session.Advanced.AddExpire(job, DateTime.UtcNow);
+                    session.SetExpiry(job, DateTime.UtcNow);
                     session.Store(anotherJob);
-                    session.Advanced.AddExpire(anotherJob, DateTime.UtcNow);
+                    session.SetExpiry(anotherJob, DateTime.UtcNow);
                     session.SaveChanges();
                 }
 
@@ -110,11 +111,11 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testJob = GetTestJob(session, job.Id);
-                    var expireAt = session.Advanced.GetExpire(testJob);
+                    var expireAt = session.GetExpiry(testJob);
                     Assert.Null(expireAt);
 
                     var anotherTestJob = GetTestJob(session, anotherJob.Id);
-                    expireAt = session.Advanced.GetExpire(anotherTestJob);
+                    expireAt = session.GetExpiry(anotherTestJob);
                     Assert.NotNull(expireAt);
                 }
             });
@@ -205,7 +206,7 @@ namespace Hangfire.Raven.Tests
                     var id = repository.GetId(typeof(Counter), "my-key");
                     Assert.Equal(id, record.Id);
                     Assert.Equal(1, record.Value);
-                    var expireAt = session.Advanced.GetExpire(record);
+                    var expireAt = session.GetExpiry(record);
                     Assert.Equal(null, expireAt);
                 }
             });
@@ -225,7 +226,7 @@ namespace Hangfire.Raven.Tests
                     var id = repository.GetId(typeof(Counter), "my-key");
                     Assert.Equal(id, record.Id);
                     Assert.Equal(1, record.Value);
-                    var expireAt = session.Advanced.GetExpire(record);
+                    var expireAt = session.GetExpiry(record);
                     Assert.NotNull(expireAt);
 
                     Assert.True(DateTime.UtcNow.AddHours(23) < expireAt);
@@ -270,7 +271,7 @@ namespace Hangfire.Raven.Tests
                     var id = repository.GetId(typeof(Counter), "my-key");
                     Assert.Equal(id, record.Id);
                     Assert.Equal(-1, record.Value);
-                    var expireAt = session.Advanced.GetExpire(record);
+                    var expireAt = session.GetExpiry(record);
                     Assert.Equal(null, expireAt);
                 }
             });
@@ -290,7 +291,7 @@ namespace Hangfire.Raven.Tests
                     var id = repository.GetId(typeof(Counter), "my-key");
                     Assert.Equal(id, record.Id);
                     Assert.Equal(-1, record.Value);
-                    var expireAt = session.Advanced.GetExpire(record);
+                    var expireAt = session.GetExpiry(record);
                     Assert.NotNull(expireAt);
 
                     Assert.True(DateTime.UtcNow.AddHours(23) < expireAt);
@@ -815,12 +816,12 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testSet1 = GetTestSet(session, set1.Id);
-                    var expireAt = session.Advanced.GetExpire(testSet1);
+                    var expireAt = session.GetExpiry(testSet1);
                     Assert.True(DateTime.UtcNow.AddMinutes(-1) < expireAt && expireAt <= DateTime.UtcNow.AddDays(1));
 
                     var testSet2 = GetTestSet(session, set2.Id);
                     Assert.NotNull(testSet2);
-                    expireAt = session.Advanced.GetExpire(testSet2);
+                    expireAt = session.GetExpiry(testSet2);
                     Assert.Null(expireAt);
                 }
             });
@@ -873,11 +874,11 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testList1 = GetTestList(session, list1.Id);
-                    var expireAt = session.Advanced.GetExpire(testList1);
+                    var expireAt = session.GetExpiry(testList1);
                     Assert.True(DateTime.UtcNow.AddMinutes(-1) < expireAt && expireAt <= DateTime.UtcNow.AddDays(1));
 
                     var testList2 = GetTestList(session, list2.Id);
-                    expireAt = session.Advanced.GetExpire(testList2);
+                    expireAt = session.GetExpiry(testList2);
                     Assert.Null(expireAt);
                 }
             });
@@ -930,11 +931,11 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testHash1 = GetTestHash(session, hash1.Id);
-                    var expireAt = session.Advanced.GetExpire(testHash1);
+                    var expireAt = session.GetExpiry(testHash1);
                     Assert.True(DateTime.UtcNow.AddMinutes(-1) < expireAt && expireAt <= DateTime.UtcNow.AddDays(1));
 
                     var testHash2 = GetTestHash(session, hash2.Id);
-                    expireAt = session.Advanced.GetExpire(testHash2);
+                    expireAt = session.GetExpiry(testHash2);
                     Assert.Null(expireAt);
                 }
             });
@@ -978,9 +979,9 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     session.Store(set1);
-                    session.Advanced.AddExpire(set1, DateTime.UtcNow);
+                    session.SetExpiry(set1, DateTime.UtcNow);
                     session.Store(set2);
-                    session.Advanced.AddExpire(set2, DateTime.UtcNow);
+                    session.SetExpiry(set2, DateTime.UtcNow);
                     session.SaveChanges();
                 }
 
@@ -989,11 +990,11 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testSet1 = GetTestSet(session, set1.Id);
-                    var expireAt = session.Advanced.GetExpire(testSet1);
+                    var expireAt = session.GetExpiry(testSet1);
                     Assert.Null(expireAt);
 
                     var testSet2 = GetTestSet(session, set2.Id);
-                    expireAt = session.Advanced.GetExpire(testSet2);
+                    expireAt = session.GetExpiry(testSet2);
                     Assert.NotNull(expireAt);
                 }
             });
@@ -1037,9 +1038,9 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     session.Store(list1);
-                    session.Advanced.AddExpire(list1, DateTime.UtcNow);
+                    session.SetExpiry(list1, DateTime.UtcNow);
                     session.Store(list2);
-                    session.Advanced.AddExpire(list2, DateTime.UtcNow);
+                    session.SetExpiry(list2, DateTime.UtcNow);
                     session.SaveChanges();
                 }
 
@@ -1048,11 +1049,11 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testList1 = GetTestList(session, list1.Id);
-                    var expireAt = session.Advanced.GetExpire(testList1);
+                    var expireAt = session.GetExpiry(testList1);
                     Assert.Null(expireAt);
 
                     var testList2 = GetTestList(session, list2.Id);
-                    expireAt = session.Advanced.GetExpire(testList2);
+                    expireAt = session.GetExpiry(testList2);
                     Assert.NotNull(expireAt);
                 }
             });
@@ -1096,9 +1097,9 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     session.Store(hash1);
-                    session.Advanced.AddExpire(hash1, DateTime.UtcNow);
+                    session.SetExpiry(hash1, DateTime.UtcNow);
                     session.Store(hash2);
-                    session.Advanced.AddExpire(hash2, DateTime.UtcNow);
+                    session.SetExpiry(hash2, DateTime.UtcNow);
                     session.SaveChanges();
                 }
 
@@ -1107,11 +1108,11 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     var testHash1 = GetTestHash(session, hash1.Id);
-                    var expireAt = session.Advanced.GetExpire(testHash1);
+                    var expireAt = session.GetExpiry(testHash1);
                     Assert.Null(expireAt);
 
                     var testHash2 = GetTestHash(session, hash2.Id);
-                    expireAt = session.Advanced.GetExpire(testHash2);
+                    expireAt = session.GetExpiry(testHash2);
                     Assert.NotNull(expireAt);
                 }
             });
@@ -1168,9 +1169,9 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     session.Store(set1);
-                    session.Advanced.AddExpire(set1, DateTime.UtcNow);
+                    session.SetExpiry(set1, DateTime.UtcNow);
                     session.Store(set2);
-                    session.Advanced.AddExpire(set2, DateTime.UtcNow);
+                    session.SetExpiry(set2, DateTime.UtcNow);
                     session.SaveChanges();
                 }
 
@@ -1227,9 +1228,9 @@ namespace Hangfire.Raven.Tests
                 using (var session = repository.OpenSession())
                 {
                     session.Store(set1);
-                    session.Advanced.AddExpire(set1, DateTime.UtcNow);
+                    session.SetExpiry(set1, DateTime.UtcNow);
                     session.Store(set2);
-                    session.Advanced.AddExpire(set2, DateTime.UtcNow);
+                    session.SetExpiry(set2, DateTime.UtcNow);
                     session.SaveChanges();
                 }
 

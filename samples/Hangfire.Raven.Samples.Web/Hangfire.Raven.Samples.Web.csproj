@@ -15,7 +15,7 @@
     <ItemGroup>
         <PackageReference Include="Hangfire.AspNetCore" Version="1.8.5" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <ProjectReference Include="..\..\src\Hangfire.Raven\Hangfire.Raven.csproj" />
     </ItemGroup>
