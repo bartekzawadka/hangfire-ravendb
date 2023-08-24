@@ -65,6 +65,8 @@ stages:
             displayName: Pack Hangfire.Raven
             inputs:
               command: 'pack'
+              versioningScheme: 'byEnvVar'
+              versionEnvVar: AppVersion
               packagesToPack: $(HangfireRavenProjectPath)
               arguments: '--configuration $(BuildConfiguration) --no-restore --no-build'
           - task: NuGetAuthenticate@0
@@ -73,7 +75,5 @@ stages:
             displayName: 'NuGet push'
             inputs:
               command: push
-              versioningScheme: 'byEnvVar'
-              versionEnvVar: AppVersion
               publishVstsFeed: 'Baz'
               allowPackageConflicts: true
