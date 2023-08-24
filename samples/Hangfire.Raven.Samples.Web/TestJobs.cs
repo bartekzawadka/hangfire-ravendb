@@ -1,22 +1,27 @@
-using System.Diagnostics;
-
 namespace Hangfire.Raven.Samples.Web;
 
-public static class TestJobs
+public class TestJobs
 {
-    private static int _x;
+    private readonly ILogger<TestJobs> _logger;
+
+    public TestJobs(ILogger<TestJobs> logger)
+    {
+        _logger = logger;
+    }
 
     [AutomaticRetry(Attempts = 2, LogEvents = true, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
-    public static void CronTest() => Debug.WriteLine($"{_x++} Cron Job: Hello, world!");
+    public void CronTest() => _logger.LogInformation("Cron Job: Hello, world!");
 
     [Queue("testing")]
-    public static void QueueTest() => Debug.WriteLine($"{_x++} Queue test Job: Hello, world!");
-
-    public static void WorkerCountTest() => Thread.Sleep(5000);
+    public void QueueTest() => _logger.LogInformation("Queue test Job: Hello, world!");
 
     [Queue("testing")]
-    public static void FailingTest() {
-        Debug.WriteLine($"{_x++} Requeue test!");
-        throw new Exception();
+    public void FailingTest() {
+        _logger.LogInformation("Requeue test!");
+        throw new Exception("FAILING TEST EXCEPTION!");
     }
+
+    [Queue("testing")]
+    public Task DelayedTest(CancellationToken cancellationToken)
+        => Task.Delay(1000, cancellationToken).ContinueWith(_ => _logger.LogInformation("Delayed job: Hello, world!"), cancellationToken);
 }

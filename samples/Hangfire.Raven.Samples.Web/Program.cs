@@ -1,8 +1,17 @@
 using Hangfire;
 using Hangfire.Raven.Samples.Web;
+using Hangfire.Raven.Samples.Web.IoC;
 using Hangfire.Raven.Storage;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog(
+    (context, configuration) =>
+    {
+        configuration.Enrich.FromLogContext()
+            .WriteTo.Console();
+    });
 
 builder.Host.ConfigureAppConfiguration(
     (context, configurationBuilder) =>
@@ -21,10 +30,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHostedService<SchedulingService>();
+builder.Services.AddScoped<TestJobs>();
 
-builder.Services.AddHangfire(
-    configuration => configuration.UseRavenStorage(
+builder.Services.AddHangfire((provider, configuration) => configuration
+        .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+        .UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UseActivator(new HangfireJobActivator(provider))
+        .UseRavenStorage(
         builder.Configuration["ConnectionStrings:RavenDebugUrl"],
         builder.Configuration["ConnectionStrings:RavenDebugDatabase"]));
 builder.Services.AddHangfireServer(options =>

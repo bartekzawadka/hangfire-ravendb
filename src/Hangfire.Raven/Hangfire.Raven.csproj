@@ -2,22 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>4.1.3.0</Version>
-    <AssemblyVersion>4.1.3.0</AssemblyVersion>
-    <FileVersion>4.1.3.0</FileVersion>
+    <Version>##{AppVersion}##</Version>
+    <AssemblyVersion>##{AppVersion}##</AssemblyVersion>
+    <FileVersion>##{AppVersion}##</FileVersion>
     <Description>RavenDB job storage for Hangfire</Description>
-    <Authors>CadyIO &lt;contact@cady.io&gt;</Authors>
-    <Company>Cady IO</Company>
-    <Copyright>Copyright @ Cady LLC</Copyright>
+    <Authors>BAZ &lt;kontakt@bartoszzawadka.pl&gt;</Authors>
+    <Company>BAZ</Company>
     <PackageLicenseUrl>http://www.gnu.org/licenses/lgpl-3.0.html</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/CadyIO/hangfire-ravendb</PackageProjectUrl>
-    <PackageIconUrl>https://avatars2.githubusercontent.com/u/7880472?v=3&amp;s=200</PackageIconUrl>
-    <PackageId>Hangfire.Raven</PackageId>
+    <PackageProjectUrl>https://github.com/bartekzawadka/hangfire-ravendb</PackageProjectUrl>
+    <PackageId>Baz.Hangfire.Raven</PackageId>
     <PackageTags>Hangfire;AspNet;MVC;OWIN;RavenDB;Long-Running;Background;Fire-And-Forget;Delayed;Recurring;Tasks;Jobs;Scheduler;Threading;Queues</PackageTags>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/CadyIO/hangfire-ravendb</RepositoryUrl>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <RepositoryUrl>https://github.com/bartekzawadka/hangfire-ravendb</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -1,0 +1,77 @@
+name: $(date:yyyyMMdd)$(rev:.r)_$(SourceBranchName)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - "*"
+
+pool:
+  vmImage: 'ubuntu-20.04'
+
+stages:
+  - stage: BuildAndPublish
+    displayName: Build and publish
+    jobs:
+      - job: BuildAndPublishJob
+        displayName: Build and publish
+        variables:
+          - name: BuildConfiguration
+            value: 'Release'
+          - name: HangfireRavenProjectPath
+            value: '**/Hangfire.Raven.csproj'
+          - name: IsMasterBranch
+            value: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
+          - name: AppVersion
+            value: '1.0.0'
+        steps:
+          - task: PowerShell@2
+            displayName: Prepare package version
+            inputs:
+              targetType: Inline
+              pwsh: true
+              script: |
+                Write-Host "Matching tag from build number: $env:BUILD_BUILDNUMBER"
+                $tmp = $env:BUILD_BUILDNUMBER -match '\d{8}.\d+'
+                $match = $Matches[0]
+                Write-Host "##vso[task.setvariable variable=AppVersion]$match"
+                Write-Host "Using tag: $match"
+          - task: UseDotNet@2
+            displayName: 'Use .NET'
+            inputs:
+              version: 6.x
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            displayName: 'Replace tokens in files'
+            inputs:
+                rootDirectory: src
+                targetFiles: |
+                  $(HangfireRavenProjectPath)
+                writeBOM: false
+                tokenPrefix: '##{'
+                tokenSuffix: '}##'
+          - task: DotNetCoreCLI@2
+            displayName: '[.Net] Restore'
+            inputs:
+              command: restore
+              projects: '**/*.csproj'
+              arguments: '--no-cache --runtime $(Runtime)'
+          - task: DotNetCoreCLI@2
+            displayName: '[.Net] Build'
+            inputs:
+              command: build
+              projects: '**/*.csproj'
+              arguments: '--configuration $(BuildConfiguration) --no-restore --no-cache'
+          - task: DotNetCoreCLI@2
+            displayName: Pack Hangfire.Raven
+            inputs:
+              command: 'pack'
+              packagesToPack: $(HangfireRavenProjectPath)
+              arguments: '--configuration $(BuildConfiguration) --no-restore --no-build'
+          - task: NuGetAuthenticate@0
+            displayName: 'NuGet Authenticate'
+          - task: NuGetCommand@2
+            displayName: 'NuGet push'
+            inputs:
+              command: push
+              publishVstsFeed: 'Baz'
+              allowPackageConflicts: true
